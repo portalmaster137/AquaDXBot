@@ -1,5 +1,6 @@
-import { log } from "./Globals";
+import { LogSingleton } from "./Globals";
 
+const log = LogSingleton.getInstance();
 export default function validateEnv() {
     log.debug("Validating environment variables...");
     if (!process.env.DISCORD_TOKEN) {

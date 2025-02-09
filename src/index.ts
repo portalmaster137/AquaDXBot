@@ -1,11 +1,17 @@
 import { configDotenv } from "dotenv";
 import validateEnv from "./envValidator";
-import { log } from "./Globals";
+import { LogSingleton, ClientSingleton } from "./Globals";
 
+const log = LogSingleton.getInstance();
 log.info("Bot Start...");
-configDotenv();
+configDotenv
 if (!validateEnv()) {
     log.error("Environment validation failed, exiting...");
     process.exit(1);
 }
-log.debug("Environment validation passed.");
+log.debug("Environment validation passed, setting client up.");
+
+ClientSingleton.setup();
+
+log.info("Client ready, logging in...");
+ClientSingleton.getInstance().login(process.env.DISCORD_TOKEN);

@@ -1,8 +1,8 @@
+import { Client, GatewayIntentBits } from "discord.js";
 import { ILogObj, Logger } from "tslog";
 
-// Check for "LOG_LEVEL" environment variable
-const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info";
 const minLevel = (() => {
+    const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info";
     switch (logLevel) {
         case "silly": return 0;
         case "trace": return 1;
@@ -15,6 +15,43 @@ const minLevel = (() => {
     }
 })();
 
-const log: Logger<ILogObj> = new Logger<ILogObj>({minLevel: minLevel});
+class LogSingleton {
+    private static instance: Logger<ILogObj>;
 
-export { log };
+    private constructor() {}
+
+    public static getInstance(): Logger<ILogObj> {
+        if (!LogSingleton.instance) {
+            LogSingleton.instance = new Logger<ILogObj>({ minLevel: minLevel });
+        }
+        return LogSingleton.instance;
+    }
+}
+
+class ClientSingleton {
+    private static instance: Client;
+    private constructor() {}
+
+    private static ensureInstance() {
+        if (!ClientSingleton.instance) {
+            ClientSingleton.instance = new Client({
+                intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+            });
+        }
+    }
+
+    public static getInstance(): Client {
+        this.ensureInstance();
+        return ClientSingleton.instance;
+    }
+
+    public static setup() {
+        this.ensureInstance();
+
+        this.instance.on("ready", () => {
+            LogSingleton.getInstance().info("Client ready.");
+        });
+    }
+}
+
+export { LogSingleton, ClientSingleton };
