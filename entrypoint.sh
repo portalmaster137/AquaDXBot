@@ -1,2 +1,2 @@
-bunx prisma migrate dev -n init --skip-generate
+bunx prisma migrate dev -n init
 bun /app/src/index.js
