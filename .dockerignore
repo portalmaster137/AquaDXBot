@@ -2,3 +2,4 @@ node_modules/
 .devcontainer/
 data/
 prisma/
+.env.example
