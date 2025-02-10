@@ -1,10 +1,9 @@
-import { ChatInputCommandInteraction, Interaction } from "discord.js";
-import ISlashCommand from "./general";
-
+import { ChatInputCommandInteraction, Interaction } from "discord.js"
+import ISlashCommand from "./general"
 
 export default class PingCommand implements ISlashCommand {
-    id = "ping";
+    id = "ping"
     async execute(interaction: ChatInputCommandInteraction) {
-        interaction.reply("Pong!");
+        interaction.reply("Pong!")
     }
 }

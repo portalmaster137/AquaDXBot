@@ -1,16 +1,16 @@
-import validateEnv from "./envValidator";
-import { LogSingleton, ClientSingleton, PrismaSingleton } from "./Globals";
+import validateEnv from "./envValidator"
+import { LogSingleton, ClientSingleton, PrismaSingleton } from "./Globals"
 
-const log = LogSingleton.getInstance();
-log.info("Bot Start...");
+const log = LogSingleton.getInstance()
+log.info("Bot Start...")
 if (!validateEnv()) {
-    log.error("Environment validation failed, exiting...");
-    process.exit(1);
+    log.error("Environment validation failed, exiting...")
+    process.exit(1)
 }
-log.debug("Environment validation passed, connecting to database...");
-await PrismaSingleton.getInstance().$connect();
-log.info("Database connected, setting up client...");
-ClientSingleton.setup();
+log.debug("Environment validation passed, connecting to database...")
+await PrismaSingleton.getInstance().$connect()
+log.info("Database connected, setting up client...")
+ClientSingleton.setup()
 
-log.info("Client ready, logging in...");
-ClientSingleton.getInstance().login(process.env.DISCORD_TOKEN);
+log.info("Client ready, logging in...")
+ClientSingleton.getInstance().login(process.env.DISCORD_TOKEN)
