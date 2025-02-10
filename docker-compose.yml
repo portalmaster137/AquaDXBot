@@ -1,0 +1,7 @@
+services:
+  aquadxbot:
+    build: .
+    container_name: aquadxbot
+    restart: always
+    environment:
+      - DISCORD_TOKEN=REPLACE_ME
