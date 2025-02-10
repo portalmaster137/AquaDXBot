@@ -1,8 +1,6 @@
 import { REST, Routes, SlashCommandBuilder } from "discord.js";
-import { configDotenv } from "dotenv";
 import validateEnv from "./envValidator";
 import { LogSingleton } from "./Globals";
-configDotenv();
 validateEnv();
 
 const commands = [
