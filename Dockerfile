@@ -6,4 +6,4 @@ COPY . .
 
 RUN bun i
 
-ENTRYPOINT [ "bun", "/app/src/index.ts" ]
+CMD [ "/bin/bash", "entrypoint.sh" ]

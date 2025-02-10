@@ -5,20 +5,21 @@ services:
     restart: always
     env_file:
       - .env
+    volumes:
+      - .\prisma\:/app/prisma
     depends_on:
       db:
         condition: service_healthy
+
 
   db:
     image: mariadb
     volumes:
       - .\data\:/var/lib/mysql
-    env_file:
-      - .env
-    ports:
-      - "3306:3306"
+    environment:
+      - MARIADB_ROOT_PASSWORD=pass
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
