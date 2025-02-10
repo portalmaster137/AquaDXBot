@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits } from "discord.js";
 import { ILogObj, Logger } from "tslog";
 import ISlashCommand from "./interactions/general";
 import PingCommand from "./interactions/ping";
+import { PrismaClient } from "@prisma/client";
 
 const minLevel = (() => {
     const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info";
@@ -75,4 +76,20 @@ class ClientSingleton {
     }
 }
 
-export { LogSingleton, ClientSingleton };
+class PrismaSingleton {
+    private static instance: PrismaClient;
+    private constructor() {}
+
+    private static ensureInstance() {
+        if (!PrismaSingleton.instance) {
+            PrismaSingleton.instance = new PrismaClient();
+        }
+    }
+
+    public static getInstance(): PrismaClient {
+        this.ensureInstance();
+        return PrismaSingleton.instance;
+    }
+}
+
+export { LogSingleton, ClientSingleton, PrismaSingleton };
