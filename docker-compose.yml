@@ -3,5 +3,5 @@ services:
     build: .
     container_name: aquadxbot
     restart: always
-    environment:
-      - DISCORD_TOKEN=REPLACE_ME
+    env_file:
+      - .env
