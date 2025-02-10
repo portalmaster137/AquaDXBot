@@ -13,6 +13,8 @@ services:
     image: mariadb
     volumes:
       - .\data\:/var/lib/mysql
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
