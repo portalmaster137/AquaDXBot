@@ -10,7 +10,7 @@ services:
         condition: service_healthy
 
   db:
-    image: mariadb:lastest
+    image: mariadb
     volumes:
       - .\data\:/var/lib/mysql
     healthcheck:
