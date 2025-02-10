@@ -16,8 +16,8 @@ services:
     image: mariadb
     volumes:
       - .\data\:/var/lib/mysql
-    environment:
-      - MARIADB_ROOT_PASSWORD=pass
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
