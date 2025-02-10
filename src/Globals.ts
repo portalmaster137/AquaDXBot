@@ -1,5 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { ILogObj, Logger } from "tslog";
+import ISlashCommand from "./interactions/general";
+import PingCommand from "./interactions/ping";
 
 const minLevel = (() => {
     const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info";
@@ -31,6 +33,7 @@ class LogSingleton {
 class ClientSingleton {
     private static instance: Client;
     private constructor() {}
+    private static commands: ISlashCommand[] = [];
 
     private static ensureInstance() {
         if (!ClientSingleton.instance) {
@@ -48,9 +51,27 @@ class ClientSingleton {
     public static setup() {
         this.ensureInstance();
 
+        this.commands.push(new PingCommand());
+
         this.instance.on("ready", () => {
             LogSingleton.getInstance().info("Client ready.");
         });
+
+        this.instance.on('interactionCreate', async (interaction)=>{
+            if (!interaction.isCommand()) return;
+            const command = this.commands.find(command => command.id === interaction.commandName);
+            if (!command) {
+                LogSingleton.getInstance().warn(`Command ${interaction.commandName} not found.`);
+                interaction.reply({content: "Command not found.", ephemeral: true});
+                return;
+            }
+            if (interaction.isChatInputCommand()) {
+                command.execute(interaction);
+            } else {
+                LogSingleton.getInstance().warn(`Interaction type ${typeof interaction} not supported.`);
+                interaction.reply({ content: "Interaction type not supported.", ephemeral: true });
+            }
+        })
     }
 }
 
