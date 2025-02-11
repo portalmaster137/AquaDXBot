@@ -1,6 +1,6 @@
 import { REST, Routes, SlashCommandBuilder } from "discord.js"
 import validateEnv from "./envValidator"
-import { LogSingleton } from "./Globals"
+import { Log } from "./Globals"
 validateEnv()
 
 const commands = [
@@ -13,6 +13,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
 
 ;(async () => {
     try {
+
         LogSingleton.getInstance().info(
             "Started refreshing application (/) commands."
         )
@@ -29,10 +30,12 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
             ),
             { body: commands }
         )
+
         LogSingleton.getInstance().info(
             "Successfully reloaded application (/) commands."
         )
+
     } catch (error) {
-        LogSingleton.getInstance().error(error)
+        Log.error(error)
     }
 })()

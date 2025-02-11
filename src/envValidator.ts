@@ -1,10 +1,9 @@
-import { LogSingleton } from "./Globals"
+import { Log } from "./Globals"
 
 export default function validateEnv() {
-    const log = LogSingleton.getInstance()
-    log.debug("Validating environment variables...")
+    Log.debug("Validating environment variables...")
     if (!process.env.DISCORD_TOKEN) {
-        log.error("DISCORD_TOKEN environment variable is required.")
+        Log.error("DISCORD_TOKEN environment variable is required.")
         return false
     }
     return true
