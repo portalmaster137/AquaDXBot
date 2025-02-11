@@ -11,6 +11,9 @@ if (!validateEnv()) {
 log.debug("Environment validation passed, connecting to database...");
 await PrismaSingleton.$connect();
 
+if (process.env.REGISTER_CMDS === "true") {
+    await registerCommands();
+}
+
 log.info("Client ready, logging in...");
 ClientSingleton.login(process.env.DISCORD_TOKEN);
-registerCommands();
