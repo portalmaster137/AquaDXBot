@@ -2,7 +2,8 @@ import { Client, GatewayIntentBits } from "discord.js"
 import { ILogObj, Logger } from "tslog"
 import ISlashCommand from "./interactions/general"
 import PingCommand from "./interactions/ping"
-import { PrismaClient } from "@prisma/client"
+import GamesCommand from "./interactions/games"
+import { Prisma, PrismaClient } from "@prisma/client"
 
 const minLevel = (() => {
     const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info"
@@ -26,93 +27,41 @@ const minLevel = (() => {
     }
 })()
 
-class LogSingleton {
-    private static instance: Logger<ILogObj>
+export const Log = new Logger<ILogObj>({ minLevel }),
+    PrismaSingleton = new PrismaClient(),
+    ClientSingleton = new Client({
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    }),
+    commands: Record<string, ISlashCommand> = {}
 
-    private constructor() {}
+commands.ping = new PingCommand()
+commands.games = new GamesCommand()
 
-    public static getInstance(): Logger<ILogObj> {
-        if (!LogSingleton.instance) {
-            LogSingleton.instance = new Logger<ILogObj>({ minLevel: minLevel })
-        }
-        return LogSingleton.instance
-    }
-}
+ClientSingleton.on("ready", () => {
+    Log.info("Client ready.")
+})
 
-class ClientSingleton {
-    private static instance: Client
-    private constructor() {}
-    private static commands: ISlashCommand[] = []
+ClientSingleton.on("interactionCreate", async interaction => {
+    if (!interaction.isCommand()) return
 
-    private static ensureInstance() {
-        if (!ClientSingleton.instance) {
-            ClientSingleton.instance = new Client({
-                intents: [
-                    GatewayIntentBits.Guilds,
-                    GatewayIntentBits.GuildMessages,
-                ],
-            })
-        }
-    }
+    const command = commands[interaction.commandName]
 
-    public static getInstance(): Client {
-        this.ensureInstance()
-        return ClientSingleton.instance
-    }
-
-    public static setup() {
-        this.ensureInstance()
-
-        this.commands.push(new PingCommand())
-
-        this.instance.on("ready", () => {
-            LogSingleton.getInstance().info("Client ready.")
+    if (!command) {
+        Log.warn(`Command ${interaction.commandName} not found.`)
+        interaction.reply({
+            content: "Command not found.",
+            ephemeral: true,
         })
+        return
+    }
 
-        this.instance.on("interactionCreate", async interaction => {
-            if (!interaction.isCommand()) return
-            const command = this.commands.find(
-                command => command.id === interaction.commandName
-            )
-            if (!command) {
-                LogSingleton.getInstance().warn(
-                    `Command ${interaction.commandName} not found.`
-                )
-                interaction.reply({
-                    content: "Command not found.",
-                    ephemeral: true,
-                })
-                return
-            }
-            if (interaction.isChatInputCommand()) {
-                command.execute(interaction)
-            } else {
-                LogSingleton.getInstance().warn(
-                    `Interaction type ${typeof interaction} not supported.`
-                )
-                interaction.reply({
-                    content: "Interaction type not supported.",
-                    ephemeral: true,
-                })
-            }
+    if (interaction.isChatInputCommand()) {
+        command.execute(interaction)
+    } else {
+        Log.warn(`Interaction type ${typeof interaction} not supported.`)
+        interaction.reply({
+            content: "Interaction type not supported.",
+            ephemeral: true,
         })
     }
-}
-
-class PrismaSingleton {
-    private static instance: PrismaClient
-    private constructor() {}
-
-    private static ensureInstance() {
-        if (!PrismaSingleton.instance) {
-            PrismaSingleton.instance = new PrismaClient()
-        }
-    }
-
-    public static getInstance(): PrismaClient {
-        this.ensureInstance()
-        return PrismaSingleton.instance
-    }
-}
-
-export { LogSingleton, ClientSingleton, PrismaSingleton }
+})

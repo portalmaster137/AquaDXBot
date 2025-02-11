@@ -1,15 +1,10 @@
 # aquadx-bot
 
-To install dependencies:
+To run the bot:
 
 ```bash
-bun install
+docker compose build
+docker compose up -d
 ```
 
-To run:
-
-```bash
-bun run src/index.ts
-```
-
-This project was created using `bun init` in bun v1.2.2. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Please note, ./prisma and ./data are volumes, and if issues arise with docker, consider deleting the data folder and the "migrations" inside the prisma folder. (This will reset everything.)
