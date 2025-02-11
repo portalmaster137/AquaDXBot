@@ -3,7 +3,13 @@ import ISlashCommand from "./general"
 
 export default class GamesCommand implements ISlashCommand {
     id = "games"
+    
     async execute(interaction: ChatInputCommandInteraction) {
-        interaction.reply("Pong!")
+        const game = interaction.options.getString('game');
+        if (game) {
+            interaction.reply(`You selected the game: ${game}`);
+        } else {
+            interaction.reply("No game selected.");
+        }
     }
 }
