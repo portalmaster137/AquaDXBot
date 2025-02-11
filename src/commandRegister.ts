@@ -14,7 +14,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
 ;(async () => {
     try {
 
-        LogSingleton.getInstance().info(
+        Log.info(
             "Started refreshing application (/) commands."
         )
 
@@ -31,7 +31,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
             { body: commands }
         )
 
-        LogSingleton.getInstance().info(
+        Log.info(
             "Successfully reloaded application (/) commands."
         )
 
