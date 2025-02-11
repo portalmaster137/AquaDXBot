@@ -1,21 +1,8 @@
 # aquadx-bot
 
-To install dependencies:
+To run the bot:
 
 ```bash
-bun install
+docker compose build
+docker compose up -d
 ```
-
-To run:
-
-```bash
-bun run src/index.ts
-```
-
-OR
-
-```bash
-docker compose up
-```
-
-This project was created using `bun init` in bun v1.2.2. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
