@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits } from "discord.js"
 import { ILogObj, Logger } from "tslog"
 import ISlashCommand from "./interactions/general"
 import PingCommand from "./interactions/ping"
+import GamesCommand from "./interactions/games"
 import { Prisma, PrismaClient } from "@prisma/client"
 
 const minLevel = (() => {
@@ -34,6 +35,7 @@ export const Log = new Logger<ILogObj>({ minLevel }),
     commands: Record<string, ISlashCommand> = {}
 
 commands.ping = new PingCommand()
+commands.games = new GamesCommand()
 
 ClientSingleton.on("ready", () => {
     Log.info("Client ready.")
