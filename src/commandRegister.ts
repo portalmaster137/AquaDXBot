@@ -1,13 +1,8 @@
 import { REST, Routes, SlashCommandBuilder } from "discord.js"
 import validateEnv from "./envValidator"
 import { Log } from "./Globals"
+import commands from "./commands"
 validateEnv()
-
-const commands = [
-    new SlashCommandBuilder()
-        .setName("ping")
-        .setDescription("Replies with Pong!"),
-].map(command => command.toJSON())
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
 
