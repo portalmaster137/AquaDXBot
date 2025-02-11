@@ -12,5 +12,11 @@ log.debug("Environment validation passed, connecting to database...");
 await PrismaSingleton.$connect();
 
 log.info("Client ready, logging in...");
-ClientSingleton.login(process.env.DISCORD_TOKEN);
-registerCommands();
+try {
+    await ClientSingleton.login(process.env.DISCORD_TOKEN);
+    await registerCommands();
+    log.info("Commands registered successfully.");
+} catch (error) {
+    log.error("An error occurred during client login or command registration:", error);
+    process.exit(1);
+}
