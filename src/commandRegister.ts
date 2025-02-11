@@ -11,7 +11,7 @@ const commands = [
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN as string)
 
-export function registerCommands() {
+export async function registerCommands() {
     (async () => {
         try {
 
@@ -19,7 +19,7 @@ export function registerCommands() {
                 "Started refreshing application (/) commands."
             )
 
-            if (process.env.WIPE_OLD_COMMANDS === "true") {
+            if (process.env.WIPE_OLD_COMMANDS === "false") {
                 await rest.put(Routes.applicationCommands(process.env.CLIENT_ID as string), {body : []})
                 await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID as string, process.env.GUILD_ID as string), {body : []})
             }
@@ -41,3 +41,4 @@ export function registerCommands() {
         }
     })()
 }
+
