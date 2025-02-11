@@ -19,7 +19,7 @@ export async function registerCommands() {
                 "Started refreshing application (/) commands."
             )
 
-            if (process.env.WIPE_OLD_COMMANDS === "false") {
+            if (process.env.WIPE_OLD_COMMANDS === "true") {
                 await rest.put(Routes.applicationCommands(process.env.CLIENT_ID as string), {body : []})
                 await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID as string, process.env.GUILD_ID as string), {body : []})
             }
