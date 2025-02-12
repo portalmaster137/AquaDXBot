@@ -30,9 +30,9 @@ export default class GamesCommand implements ISlashCommand {
     handleChuni(option: string | null): string {
         switch (option) {
             case 'oldest':
-                return "Chunithm oldest supported version:Chunithm NEW!! (1.00)";
+                return "Chunithm oldest supported version: Chunithm NEW!! (1.00)";
             case 'newest':
-                return "Chunithm newest supported version: LUMINOUS PLUS (2.27)";
+                return "Chunithm newest supported version: Chunithm LUMINOUS PLUS (2.27)";
             case 'faq':
                 return "Chunithm FAQ...";
             default:
@@ -43,9 +43,9 @@ export default class GamesCommand implements ISlashCommand {
     handleMai2(option: string | null): string {
         switch (option) {
             case 'oldest':
-                return "maimai oldest supported version:maimai DX (1.00)";
+                return "maimai oldest supported version: maimai DX (1.00)";
             case 'newest':
-                return "maimai newest supported version:maimai DX Prism (1.50)";
+                return "maimai newest supported version: maimai DX Prism (1.50)";
             case 'faq':
                 return "maimai FAQ...";
             default:
@@ -56,9 +56,9 @@ export default class GamesCommand implements ISlashCommand {
     handleMu3(option: string | null): string {
         switch (option) {
             case 'oldest':
-            return "Ongeki oldest supported version:O.N.G.E.K.I. (1.00)";
+            return "Ongeki oldest supported version: O.N.G.E.K.I. (1.00)";
             case 'newest':
-                return "Ongeki newest supported version:O.N.G.E.K.I. bright MEMORY (1.40)";
+                return "Ongeki newest supported version: O.N.G.E.K.I. bright MEMORY (1.40)";
             case 'faq':
                 return "Ongeki FAQ...";
             default:
