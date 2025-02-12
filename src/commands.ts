@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js"
 
 const commands = [
     new SlashCommandBuilder()
@@ -16,7 +16,9 @@ const commands = [
                     { name: 'maimai', value: 'mai2' },
                     { name: 'Ongeki', value: 'mu3' },
                 )),
-                
+    new SlashCommandBuilder()
+        .setName("test")
+        .setDescription("Test embeds"),            
 ].map(command => command.toJSON());
 
 export default commands;
