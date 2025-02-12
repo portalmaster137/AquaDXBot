@@ -7,14 +7,6 @@ const testEmbed = new EmbedBuilder()
     .setTimestamp()
     .setFooter({ text: "Test footer" });
 
-const pingEmbed = new EmbedBuilder()
-    .setTitle("Pong!")
-    .setDescription("This is a ping response embed")
-    .setColor(0x00FF00) // GREEN color in hexadecimal
-    .setTimestamp()
-    .setFooter({ text: "Ping footer" });
-
 export default {
     testEmbed: testEmbed.toJSON(),
-    pingEmbed: pingEmbed.toJSON(),
 };
