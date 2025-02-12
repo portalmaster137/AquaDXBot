@@ -9,7 +9,7 @@ const commands = [
         .setDescription("FAQ for Sega's arcade games")
         .addStringOption(option =>
             option.setName('game')
-                .setDescription('Choose what game your running')
+                .setDescription('Choose the game you are playing')
                 .setRequired(true)
                 .addChoices(
                     { name: 'Chunithm', value: 'chuni' },
