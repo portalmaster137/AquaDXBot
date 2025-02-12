@@ -5,28 +5,9 @@ import PingCommand from "./interactions/ping"
 import GamesCommand from "./interactions/games"
 import TestEmbedCommand from "./interactions/test" 
 import { Prisma, PrismaClient } from "@prisma/client"
+import Configuration from "./configuration"
 
-const minLevel = (() => {
-    const logLevel: string = process.env.LOG_LEVEL?.toLowerCase() || "info"
-    switch (logLevel) {
-        case "silly":
-            return 0
-        case "trace":
-            return 1
-        case "debug":
-            return 2
-        case "info":
-            return 3
-        case "warn":
-            return 4
-        case "error":
-            return 5
-        case "fatal":
-            return 6
-        default:
-            return 3
-    }
-})()
+const minLevel = Configuration.emit.log_level
 
 export const Log = new Logger<ILogObj>({ minLevel }),
     PrismaSingleton = new PrismaClient(),
