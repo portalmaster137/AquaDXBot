@@ -44,7 +44,9 @@ ClientSingleton.on("ready", () => {
 })
 
 ClientSingleton.on("interactionCreate", async interaction => {
-    if (!interaction.isCommand()) return
+    if (!interaction.isCommand()) {
+      return
+    }
 
     const command = commands[interaction.commandName]
 
