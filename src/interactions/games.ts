@@ -30,7 +30,7 @@ export default class GamesCommand implements ISlashCommand {
     handleChuni(option: string | null): string {
         switch (option) {
             case 'oldest':
-                return "Chunithm oldest supported version: Chunithm NEW!! (1.00)";
+                return "Chunithm oldest supported version: Chunithm NEW!! (2.00)";
             case 'newest':
                 return "Chunithm newest supported version: Chunithm LUMINOUS PLUS (2.27)";
             case 'faq':
