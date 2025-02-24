@@ -2,8 +2,6 @@ services:
   aquadxbot:
     build:
       context: .
-      cache_from:
-        - aquadxbot:latest
     container_name: aquadxbot
     restart: always
     env_file:
