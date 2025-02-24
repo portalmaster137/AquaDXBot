@@ -3,14 +3,14 @@
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^22.13.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
-    "@types/node": "^22.13.1",
     "discord.js": "^14.17.3",
     "prisma": "^6.3.1",
     "tslog": "^4.9.3"
