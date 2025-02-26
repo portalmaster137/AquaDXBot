@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
-    "aquadx-bot": "file:",
     "discord.js": "^14.17.3",
     "prisma": "^6.3.1",
     "tslog": "^4.9.3"
