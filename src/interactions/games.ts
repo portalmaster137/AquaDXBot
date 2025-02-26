@@ -9,7 +9,7 @@ const gameResponses: {
     chuni: {
       oldest: "Chunithm oldest supported version: Chunithm NEW!! (2.00)",
       newest: "Chunithm newest supported version: Chunithm VERSE (2.30)",
-      faq: "Chunithm FAQ...",
+      faq: "Chunithm FAQ: https://two-torial.xyz/games/chunithmluminousplus/troubleshooting/",
       default: "Unknown option selected for Chunithm."
     },
     mai2: {
@@ -21,7 +21,7 @@ const gameResponses: {
     mu3: {
       oldest: "Ongeki oldest supported version: O.N.G.E.K.I. (1.00)",
       newest: "Ongeki newest supported version: O.N.G.E.K.I. bright MEMORY (1.40)",
-      faq: "Ongeki FAQ...",
+      faq: "Ongeki FAQ: https://two-torial.xyz/games/ongekibrightmemory/troubleshooting/",
       default: "Unknown option selected for Ongeki."
     }
   };
