@@ -5,8 +5,16 @@ import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role
 export const setupReactionRoleManager = (client: Client) => {
     console.log("Setting up reaction role manager...");
     
-    const MESSAGE: Snowflake = process.env.MESSAGE!!;
-    const ROLE: Snowflake = process.env.ROLE!!;
+    const messageEnv = process.env.MESSAGE;
+    if (!messageEnv) {
+      throw new Error("Missing required environment variable: MESSAGE");
+    }
+    const MESSAGE: Snowflake = messageEnv;
+    const roleEnv = process.env.ROLE;
+    if (!roleEnv) {
+      throw new Error("Missing required environment variable: ROLE");
+    }
+    const ROLE: Snowflake = roleEnv;
     
     console.log(`Using message ID: ${MESSAGE}`);
     console.log(`Using role ID: ${ROLE}`);
