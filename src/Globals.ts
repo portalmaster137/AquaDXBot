@@ -12,7 +12,10 @@ const minLevel = Configuration.emit.log_level
 export const Log = new Logger<ILogObj>({ minLevel }),
     PrismaSingleton = new PrismaClient(),
     ClientSingleton = new Client({
-        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+        intents: [
+            GatewayIntentBits.Guilds, 
+            GatewayIntentBits.GuildMessages
+        ],
     }),
     commands: Record<string, ISlashCommand> = {}
 
