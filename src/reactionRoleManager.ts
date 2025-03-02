@@ -7,7 +7,7 @@ export const setupReactionRoleManager = (client: Client) => {
     const configuration: ReactionRoleConfiguration[] = [
         {
             messageId: MESSAGE,
-            reaction: "🔴",
+            reaction: "🍕",
             roleId: ROLE,
         },
     ];
