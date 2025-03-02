@@ -1,5 +1,5 @@
 import { Client, Snowflake } from "discord.js"
-import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role
+import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role"
 
 export const setupReactionRoleManager = (client: Client) => {
     const MESSAGE: Snowflake = process.env.MESSAGE!!;
