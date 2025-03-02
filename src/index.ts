@@ -1,4 +1,3 @@
-import validateEnv from "./configuration"
 import { Log, ClientSingleton, PrismaSingleton } from "./Globals"
 import { registerCommands } from "./commandRegister"
 
