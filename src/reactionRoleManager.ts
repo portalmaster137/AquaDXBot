@@ -1,5 +1,4 @@
 import { Client, Snowflake } from "discord.js"
-import { ClientSingleton } from "./Globals"
 import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role"
 
 export const setupReactionRoleManager = (client: Client) => {
