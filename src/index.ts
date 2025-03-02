@@ -9,7 +9,8 @@ if (process.env.REGISTER_CMDS === "true") {
     await registerCommands()
 }
 
-const manager = setupReactionRoleManager(ClientSingleton);
+const client = ClientSingleton
+const manager = setupReactionRoleManager(client);
 
 Log.info("Client ready, logging in...")
 ClientSingleton.login(process.env.DISCORD_TOKEN)
