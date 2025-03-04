@@ -1,19 +1,16 @@
 import mysql, { PoolConnection, Pool, QueryOptions, FieldInfo, MysqlError, OkPacket } from 'mysql';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
-// Database connection configuration using DATABASE_URL
 const dbConfig = {
   uri: process.env.DATABASE_URL,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  charset: 'utf8mb4' // Ensure proper UTF-8 support for emojis
+  charset: 'utf8mb4'
 };
 
-// Parse the DATABASE_URL to extract individual components
 if (!dbConfig.uri) {
   throw new Error('DATABASE_URL is not defined');
 }
@@ -22,17 +19,15 @@ const dbConnectionConfig = {
   host: url.hostname,
   user: url.username,
   password: url.password,
-  database: url.pathname.substring(1), // Remove leading '/'
+  database: url.pathname.substring(1),
   waitForConnections: dbConfig.waitForConnections,
   connectionLimit: dbConfig.connectionLimit,
   queueLimit: dbConfig.queueLimit,
   charset: dbConfig.charset
 };
 
-// Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Initialize database tables immediately on module import
 export async function initDatabase() {
   try {
     await initializeDatabase();
@@ -42,7 +37,6 @@ export async function initDatabase() {
   }
 }
 
-// Helper function to execute queries
 export async function query(sql: string, params?: any[]) {
   try {
     const results = await new Promise<any[]>((resolve, reject) => {
@@ -60,11 +54,9 @@ export async function query(sql: string, params?: any[]) {
   }
 }
 
-// Database wrapper - simulating collection interface similar to MongoDB for easier transition
 export const db = {
   collection: (table: string) => ({
     find: async (filter: Record<string, any> = {}) => {
-      // Build WHERE clause from filter
       let whereClause = '';
       const params: any[] = [];
 
@@ -83,7 +75,6 @@ export const db = {
     },
 
     findOne: async (filter: Record<string, any> = {}) => {
-      // Build WHERE clause from filter
       let whereClause = '';
       const params: any[] = [];
 
@@ -116,11 +107,9 @@ export const db = {
     },
 
     updateOne: async (filter: Record<string, any>, update: Record<string, any>) => {
-      // Build WHERE clause from filter
       const whereConditions = Object.entries(filter).map(([key]) => `${key} = ?`);
       const whereParams = Object.values(filter);
 
-      // Build SET clause from update
       const setEntries = Object.entries(update.$set || update);
       const setClauses = setEntries.map(([key]) => `${key} = ?`);
       const setParams = setEntries.map(([, value]) => value);
@@ -136,7 +125,6 @@ export const db = {
     },
 
     deleteOne: async (filter: Record<string, any>) => {
-      // Build WHERE clause from filter
       const whereConditions = Object.entries(filter).map(([key]) => `${key} = ?`);
       const whereParams = Object.values(filter);
 
@@ -151,11 +139,9 @@ export const db = {
   })
 };
 
-// Initialize database by creating tables if they don't exist
 export async function initializeDatabase() {
   console.log('Initializing database...');
 
-  // Create reaction roles table with proper character set for emoji support
   await query(`
     CREATE TABLE IF NOT EXISTS reactionRoles (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -170,7 +156,6 @@ export async function initializeDatabase() {
   console.log('Database initialized successfully');
 }
 
-// Function to test database connection
 export async function testConnection() {
   return new Promise<boolean>((resolve) => {
     pool.getConnection((err, connection) => {
@@ -186,7 +171,6 @@ export async function testConnection() {
   });
 }
 
-// Function to close database connections
 export async function closeDatabase() {
   return new Promise<void>((resolve, reject) => {
     pool.end((err) => {

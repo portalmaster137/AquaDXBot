@@ -1,11 +1,10 @@
 import { Client, Snowflake, TextChannel, Message, GuildMember } from "discord.js"
 import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role"
-import { db } from "./database" // Assuming you have a database module
+import { db } from "./database"
 
 export const setupReactionRoleManager = async (client: Client) => {
     console.log("Setting up reaction role manager...");
     
-    // Fetch reaction role configurations from database
     const reactionRoleConfigs = await (await db.collection("reactionRoles").find({})).toArray();
     
     if (reactionRoleConfigs.length === 0) {
@@ -13,7 +12,6 @@ export const setupReactionRoleManager = async (client: Client) => {
         return null;
     }
     
-    // Convert database entries to ReactionRoleConfiguration format
     const configuration: ReactionRoleConfiguration[] = reactionRoleConfigs.map((config: { messageId: string; roleId: string; reaction: any; }) => {
         console.log(`Loading reaction role config: message=${config.messageId}, role=${config.roleId}, reaction=${config.reaction}`);
         return {
@@ -23,12 +21,10 @@ export const setupReactionRoleManager = async (client: Client) => {
         };
     });
     
-    // Add missing reactions to messages
     await addMissingReactions(client, configuration);
     
     const reactionRoleManager = new ReactionRole(client, configuration);
     
-    // Add event listeners for role assignment and removal
     attachReactionRoleEventListeners(client, reactionRoleManager);
     
     console.log(`Reaction role manager setup complete with ${configuration.length} configurations`);
@@ -36,17 +32,14 @@ export const setupReactionRoleManager = async (client: Client) => {
     return reactionRoleManager;
 };
 
-// Function to attach event listeners to the reactionRole manager
 function attachReactionRoleEventListeners(client: Client, reactionRoleManager: ReactionRole) {
-    // Listen for the roleAdd event
     client.on('messageReactionAdd', async (reaction, user) => {
         try {
-            if (user.bot) return; // Ignore bot reactions
+            if (user.bot) return;
             
             const { message } = reaction;
-            if (!message.guild) return; // Only process guild messages
+            if (!message.guild) return;
             
-            // Find if this reaction is configured for a role
             const config = await db.collection("reactionRoles").findOne({
                 messageId: message.id,
                 reaction: reaction.emoji.id 
@@ -54,39 +47,23 @@ function attachReactionRoleEventListeners(client: Client, reactionRoleManager: R
                     : reaction.emoji.name
             });
             
-            if (!config) return; // Not a configured reaction role
+            if (!config) return;
             
-            // Get the member who reacted
             const member = await message.guild.members.fetch(user.id).catch(() => null);
             if (!member) return;
             
-            // Check if the role was added (we'll do this by checking if they have the role after a short delay)
-            setTimeout(async () => {
-                try {
-                    const role = await message.guild!.roles.fetch(config.roleId).catch(() => null);
-                    if (!role) return;
-                    
-                    if (member.roles.cache.has(role.id)) {
-                        console.log(`✅ Role added: "${role.name}" assigned to ${member.user.tag} from reaction ${reaction.emoji.toString()} on message ${message.id}`);
-                    }
-                } catch (error) {
-                    console.error('Error checking role assignment:', error);
-                }
-            }, 1000); // Check after 1 second to allow time for the role to be assigned
         } catch (error) {
             console.error('Error in reaction add event handler:', error);
         }
     });
     
-    // Listen for the roleRemove event
     client.on('messageReactionRemove', async (reaction, user) => {
         try {
-            if (user.bot) return; // Ignore bot reactions
+            if (user.bot) return;
             
             const { message } = reaction;
-            if (!message.guild) return; // Only process guild messages
+            if (!message.guild) return;
             
-            // Find if this reaction is configured for a role
             const config = await db.collection("reactionRoles").findOne({
                 messageId: message.id,
                 reaction: reaction.emoji.id 
@@ -94,25 +71,11 @@ function attachReactionRoleEventListeners(client: Client, reactionRoleManager: R
                     : reaction.emoji.name
             });
             
-            if (!config) return; // Not a configured reaction role
+            if (!config) return;
             
-            // Get the member who reacted
             const member = await message.guild.members.fetch(user.id).catch(() => null);
             if (!member) return;
             
-            // Check if the role was removed (we'll do this by checking if they don't have the role after a short delay)
-            setTimeout(async () => {
-                try {
-                    const role = await message.guild!.roles.fetch(config.roleId).catch(() => null);
-                    if (!role) return;
-                    
-                    if (!member.roles.cache.has(role.id)) {
-                        console.log(`❌ Role removed: "${role.name}" removed from ${member.user.tag} by removing reaction ${reaction.emoji.toString()} on message ${message.id}`);
-                    }
-                } catch (error) {
-                    console.error('Error checking role removal:', error);
-                }
-            }, 1000); // Check after 1 second to allow time for the role to be removed
         } catch (error) {
             console.error('Error in reaction remove event handler:', error);
         }
@@ -121,9 +84,8 @@ function attachReactionRoleEventListeners(client: Client, reactionRoleManager: R
     console.log('Reaction role event listeners attached');
 }
 
-// Function to add missing reactions to messages
+// Add missing reactions to messages
 async function addMissingReactions(client: Client, configs: ReactionRoleConfiguration[]) {
-    // Group configurations by message ID for efficiency
     const messageConfigs = new Map<Snowflake, { reaction: string, roleId: Snowflake }[]>();
     
     configs.forEach(config => {
@@ -136,16 +98,13 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
         });
     });
     
-    // Process each message
     for (const [messageId, configsForMessage] of messageConfigs.entries()) {
         try {
-            // Find the message across all accessible channels
             let targetMessage: Message | null = null;
             
             for (const guild of client.guilds.cache.values()) {
                 if (targetMessage) break;
                 
-                // Helper to find a message across all accessible channels in all guilds
                 async function findMessage(client: Client, messageId: Snowflake): Promise<Message | null> {
                     for (const guild of client.guilds.cache.values()) {
                         const channels = guild.channels.cache.filter(
@@ -160,7 +119,7 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
                                     return message;
                                 }
                             } catch (error) {
-                                // Skip channels where we don't have permission
+                                
                             }
                         }
                     }
@@ -168,7 +127,6 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
                     return null;
                 }
 
-                // Replace the nested loops with:
                 targetMessage = await findMessage(client, messageId);
                 if (!targetMessage) continue;
                 
@@ -182,7 +140,7 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
                             break;
                         }
                     } catch (error) {
-                        // Skip channels where we don't have permission
+                        
                     }
                 }
             }
@@ -192,7 +150,6 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
                 continue;
             }
             
-            // Check and add missing reactions
             const existingReactions = targetMessage.reactions.cache.map(r => 
                 r.emoji.id ? `<:${r.emoji.name}:${r.emoji.id}>` : r.emoji.name
             );
@@ -200,13 +157,12 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
             for (const config of configsForMessage) {
                 const reactionExists = existingReactions.some(existing => 
                     existing === config.reaction || 
-                    existing === config.reaction.replace(/^<a:/, '<:')  // Handle animated vs. static emojis
+                    existing === config.reaction.replace(/^<a:/, '<:')
                 );
                 
                 if (!reactionExists) {
                     console.log(`Adding missing reaction ${config.reaction} to message ${messageId}`);
                     try {
-                        // Handle custom emoji format <:name:id> or <a:name:id>
                         if (config.reaction.startsWith('<') && config.reaction.endsWith('>')) {
                             const match = config.reaction.match(/<a?:([^:]+):(\d+)>/);
                             if (match) {
@@ -221,7 +177,6 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
                         console.error(`Failed to add reaction ${config.reaction} to message ${messageId}:`, error);
                     }
                     
-                    // Add a small delay to avoid rate limiting
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
             }
@@ -231,7 +186,6 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
     }
 }
 
-// Helper function to add a new reaction role configuration
 export const addReactionRole = async (messageId: Snowflake, roleId: Snowflake, reaction: string, client?: Client) => {
     await db.collection("reactionRoles").insertOne({
         messageId,
@@ -240,10 +194,8 @@ export const addReactionRole = async (messageId: Snowflake, roleId: Snowflake, r
     });
     console.log(`Added new reaction role: message=${messageId}, role=${roleId}, reaction=${reaction}`);
     
-    // If client is provided, add the reaction to the message immediately
     if (client) {
         try {
-            // Find the message across all accessible channels
             let targetMessage: Message | null = null;
             
             for (const guild of client.guilds.cache.values()) {
@@ -262,7 +214,7 @@ export const addReactionRole = async (messageId: Snowflake, roleId: Snowflake, r
                             break;
                         }
                     } catch (error) {
-                        // Skip channels where we don't have permission
+                        
                     }
                 }
             }
@@ -272,7 +224,6 @@ export const addReactionRole = async (messageId: Snowflake, roleId: Snowflake, r
                 return;
             }
             
-            // Add the reaction to the message
             if (reaction.startsWith('<') && reaction.endsWith('>')) {
                 const match = reaction.match(/<a?:([^:]+):(\d+)>/);
                 if (match) {
@@ -289,7 +240,6 @@ export const addReactionRole = async (messageId: Snowflake, roleId: Snowflake, r
     }
 };
 
-// Helper function to remove a reaction role configuration
 export const removeReactionRole = async (messageId: Snowflake, roleId: Snowflake) => {
     const result = await db.collection("reactionRoles").deleteOne({
         messageId,
@@ -304,7 +254,4 @@ export const removeReactionRole = async (messageId: Snowflake, roleId: Snowflake
     console.log(`No reaction role found for message=${messageId}, role=${roleId}`);
     return false;
 };
-function endsWith(arg0: string) {
-    throw new Error("Function not implemented.");
-}
 
