@@ -4,16 +4,29 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Database connection configuration - optimized for MariaDB
+// Database connection configuration using DATABASE_URL
 const dbConfig = {
-  host: process.env.DB_HOST || 'db', // Changed default to 'db' to match docker service name
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'password',
-  database: process.env.DB_NAME || 'aquadxbot',
+  uri: process.env.DATABASE_URL,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   charset: 'utf8mb4' // Ensure proper UTF-8 support for emojis
+};
+
+// Parse the DATABASE_URL to extract individual components
+if (!dbConfig.uri) {
+  throw new Error('DATABASE_URL is not defined');
+}
+const url = new URL(dbConfig.uri);
+const dbConnectionConfig = {
+  host: url.hostname,
+  user: url.username,
+  password: url.password,
+  database: url.pathname.substring(1), // Remove leading '/'
+  waitForConnections: dbConfig.waitForConnections,
+  connectionLimit: dbConfig.connectionLimit,
+  queueLimit: dbConfig.queueLimit,
+  charset: dbConfig.charset
 };
 
 // Create connection pool
@@ -54,7 +67,7 @@ export const db = {
       // Build WHERE clause from filter
       let whereClause = '';
       const params: any[] = [];
-      
+
       if (Object.keys(filter).length > 0) {
         const conditions = Object.entries(filter).map(([key, value]) => {
           params.push(value);
@@ -62,18 +75,18 @@ export const db = {
         });
         whereClause = `WHERE ${conditions.join(' AND ')}`;
       }
-      
+
       const sql = `SELECT * FROM ${table} ${whereClause}`;
       return {
         toArray: async () => await query(sql, params)
       };
     },
-    
+
     findOne: async (filter: Record<string, any> = {}) => {
       // Build WHERE clause from filter
       let whereClause = '';
       const params: any[] = [];
-      
+
       if (Object.keys(filter).length > 0) {
         const conditions = Object.entries(filter).map(([key, value]) => {
           params.push(value);
@@ -81,55 +94,55 @@ export const db = {
         });
         whereClause = `WHERE ${conditions.join(' AND ')}`;
       }
-      
+
       const sql = `SELECT * FROM ${table} ${whereClause} LIMIT 1`;
       const results = await query(sql, params);
       return Array.isArray(results) && results.length > 0 ? results[0] : null;
     },
-    
+
     insertOne: async (document: Record<string, any>) => {
       const keys = Object.keys(document);
       const placeholders = keys.map(() => '?').join(', ');
       const values = Object.values(document);
-      
+
       const sql = `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders})`;
       const result = await query(sql, values) as any;
-      
+
       return {
         insertedId: result.insertId,
         acknowledged: true,
         insertedCount: result.affectedRows
       };
     },
-    
+
     updateOne: async (filter: Record<string, any>, update: Record<string, any>) => {
       // Build WHERE clause from filter
       const whereConditions = Object.entries(filter).map(([key]) => `${key} = ?`);
       const whereParams = Object.values(filter);
-      
+
       // Build SET clause from update
       const setEntries = Object.entries(update.$set || update);
       const setClauses = setEntries.map(([key]) => `${key} = ?`);
       const setParams = setEntries.map(([, value]) => value);
-      
+
       const sql = `UPDATE ${table} SET ${setClauses.join(', ')} WHERE ${whereConditions.join(' AND ')}`;
       const result = await query(sql, [...setParams, ...whereParams]) as unknown as OkPacket;
-      
+
       return {
         acknowledged: true,
         modifiedCount: result.affectedRows,
         matchedCount: result.affectedRows
       };
     },
-    
+
     deleteOne: async (filter: Record<string, any>) => {
       // Build WHERE clause from filter
       const whereConditions = Object.entries(filter).map(([key]) => `${key} = ?`);
       const whereParams = Object.values(filter);
-      
+
       const sql = `DELETE FROM ${table} WHERE ${whereConditions.join(' AND ')} LIMIT 1`;
       const result = await query(sql, whereParams) as unknown as OkPacket;
-      
+
       return {
         acknowledged: true,
         deletedCount: result.affectedRows
@@ -141,7 +154,7 @@ export const db = {
 // Initialize database by creating tables if they don't exist
 export async function initializeDatabase() {
   console.log('Initializing database...');
-  
+
   // Create reaction roles table with proper character set for emoji support
   await query(`
     CREATE TABLE IF NOT EXISTS reactionRoles (
@@ -153,7 +166,7 @@ export async function initializeDatabase() {
       UNIQUE KEY unique_reaction_role (messageId, roleId)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `);
-  
+
   console.log('Database initialized successfully');
 }
 
