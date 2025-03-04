@@ -1,4 +1,4 @@
-import { Client, Snowflake, TextChannel, Message } from "discord.js"
+import { Client, Snowflake, TextChannel, Message, GuildMember } from "discord.js"
 import { ReactionRole, ReactionRoleConfiguration } from "discordjs-reaction-role"
 import { db } from "./database" // Assuming you have a database module
 
@@ -27,10 +27,99 @@ export const setupReactionRoleManager = async (client: Client) => {
     await addMissingReactions(client, configuration);
     
     const reactionRoleManager = new ReactionRole(client, configuration);
+    
+    // Add event listeners for role assignment and removal
+    attachReactionRoleEventListeners(client, reactionRoleManager);
+    
     console.log(`Reaction role manager setup complete with ${configuration.length} configurations`);
     
     return reactionRoleManager;
 };
+
+// Function to attach event listeners to the reactionRole manager
+function attachReactionRoleEventListeners(client: Client, reactionRoleManager: ReactionRole) {
+    // Listen for the roleAdd event
+    client.on('messageReactionAdd', async (reaction, user) => {
+        try {
+            if (user.bot) return; // Ignore bot reactions
+            
+            const { message } = reaction;
+            if (!message.guild) return; // Only process guild messages
+            
+            // Find if this reaction is configured for a role
+            const config = await db.collection("reactionRoles").findOne({
+                messageId: message.id,
+                reaction: reaction.emoji.id 
+                    ? `<${reaction.emoji.animated ? 'a' : ''}:${reaction.emoji.name}:${reaction.emoji.id}>` 
+                    : reaction.emoji.name
+            });
+            
+            if (!config) return; // Not a configured reaction role
+            
+            // Get the member who reacted
+            const member = await message.guild.members.fetch(user.id).catch(() => null);
+            if (!member) return;
+            
+            // Check if the role was added (we'll do this by checking if they have the role after a short delay)
+            setTimeout(async () => {
+                try {
+                    const role = await message.guild!.roles.fetch(config.roleId).catch(() => null);
+                    if (!role) return;
+                    
+                    if (member.roles.cache.has(role.id)) {
+                        console.log(`✅ Role added: "${role.name}" assigned to ${member.user.tag} from reaction ${reaction.emoji.toString()} on message ${message.id}`);
+                    }
+                } catch (error) {
+                    console.error('Error checking role assignment:', error);
+                }
+            }, 1000); // Check after 1 second to allow time for the role to be assigned
+        } catch (error) {
+            console.error('Error in reaction add event handler:', error);
+        }
+    });
+    
+    // Listen for the roleRemove event
+    client.on('messageReactionRemove', async (reaction, user) => {
+        try {
+            if (user.bot) return; // Ignore bot reactions
+            
+            const { message } = reaction;
+            if (!message.guild) return; // Only process guild messages
+            
+            // Find if this reaction is configured for a role
+            const config = await db.collection("reactionRoles").findOne({
+                messageId: message.id,
+                reaction: reaction.emoji.id 
+                    ? `<${reaction.emoji.animated ? 'a' : ''}:${reaction.emoji.name}:${reaction.emoji.id}>` 
+                    : reaction.emoji.name
+            });
+            
+            if (!config) return; // Not a configured reaction role
+            
+            // Get the member who reacted
+            const member = await message.guild.members.fetch(user.id).catch(() => null);
+            if (!member) return;
+            
+            // Check if the role was removed (we'll do this by checking if they don't have the role after a short delay)
+            setTimeout(async () => {
+                try {
+                    const role = await message.guild!.roles.fetch(config.roleId).catch(() => null);
+                    if (!role) return;
+                    
+                    if (!member.roles.cache.has(role.id)) {
+                        console.log(`❌ Role removed: "${role.name}" removed from ${member.user.tag} by removing reaction ${reaction.emoji.toString()} on message ${message.id}`);
+                    }
+                } catch (error) {
+                    console.error('Error checking role removal:', error);
+                }
+            }, 1000); // Check after 1 second to allow time for the role to be removed
+        } catch (error) {
+            console.error('Error in reaction remove event handler:', error);
+        }
+    });
+    
+    console.log('Reaction role event listeners attached');
+}
 
 // Function to add missing reactions to messages
 async function addMissingReactions(client: Client, configs: ReactionRoleConfiguration[]) {
@@ -56,11 +145,34 @@ async function addMissingReactions(client: Client, configs: ReactionRoleConfigur
             for (const guild of client.guilds.cache.values()) {
                 if (targetMessage) break;
                 
-                const channels = guild.channels.cache.filter(
-                    channel => channel.isTextBased() && !channel.isThread()
-                );
+                // Helper to find a message across all accessible channels in all guilds
+                async function findMessage(client: Client, messageId: Snowflake): Promise<Message | null> {
+                    for (const guild of client.guilds.cache.values()) {
+                        const channels = guild.channels.cache.filter(
+                            channel => channel.isTextBased() && !channel.isThread()
+                        );
+                        for (const channel of channels.values()) {
+                            try {
+                                const textChannel = channel as TextChannel;
+                                const message = await textChannel.messages.fetch(messageId).catch(() => null);
+                                if (message) {
+                                    console.log(`Found message ${messageId} in channel #${textChannel.name} (${textChannel.id})`);
+                                    return message;
+                                }
+                            } catch (error) {
+                                // Skip channels where we don't have permission
+                            }
+                        }
+                    }
+                    console.log(`Could not find message ${messageId} in any channel`);
+                    return null;
+                }
+
+                // Replace the nested loops with:
+                targetMessage = await findMessage(client, messageId);
+                if (!targetMessage) continue;
                 
-                for (const channel of channels.values()) {
+                for (const channel of guild.channels.cache.values()) {
                     try {
                         const textChannel = channel as TextChannel;
                         const message = await textChannel.messages.fetch(messageId).catch(() => null);
@@ -192,3 +304,7 @@ export const removeReactionRole = async (messageId: Snowflake, roleId: Snowflake
     console.log(`No reaction role found for message=${messageId}, role=${roleId}`);
     return false;
 };
+function endsWith(arg0: string) {
+    throw new Error("Function not implemented.");
+}
+

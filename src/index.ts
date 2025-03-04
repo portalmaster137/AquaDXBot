@@ -11,8 +11,6 @@ if (process.env.REGISTER_CMDS === "true") {
 }
 
 const client = ClientSingleton
-const manager = setupReactionRoleManager(client);
-
 client.once('ready', () => {
   console.log(`Logged in as ${client.user?.tag}!`);
   
@@ -23,6 +21,7 @@ client.once('ready', () => {
   const PORT = parseInt(process.env.WEB_UI_PORT || '3000');
   startWebServer(client, PORT);
 });
+  console.log(`Logged in as ${client.user?.tag}!`);
 
 Log.info("Client ready, logging in...")
 ClientSingleton.login(process.env.DISCORD_TOKEN)

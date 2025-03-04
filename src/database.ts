@@ -20,13 +20,14 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 // Initialize database tables immediately on module import
-(async function() {
+export async function initDatabase() {
   try {
     await initializeDatabase();
   } catch (err) {
     console.error('Failed to initialize database tables:', err);
+    throw err;
   }
-})();
+}
 
 // Helper function to execute queries
 export async function query(sql: string, params?: any[]) {
