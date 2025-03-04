@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { Client } from 'discord.js';
@@ -6,7 +6,8 @@ import { db } from './database';
 import { setupReactionRoleManager } from './reactionRoleManager';
 
 export function startWebServer(client: Client, port: number = 3000) {
-  const app = express();
+  // Initialize express app
+  const app: Application = express();
 
   // Middleware
   app.use(cors());
@@ -15,7 +16,7 @@ export function startWebServer(client: Client, port: number = 3000) {
 
   // API Routes
   // Get all reaction roles
-  app.get('/api/reaction-roles', async (req, res) => {
+  app.get('/api/reaction-roles', async (req: Request, res: Response) => {
     try {
       const reactionRoles = await (await db.collection('reactionRoles').find({})).toArray();
       res.json(reactionRoles);
@@ -26,7 +27,7 @@ export function startWebServer(client: Client, port: number = 3000) {
   });
 
   // Create a new reaction role
-  app.post('/api/reaction-roles', async (req, res) => {
+  app.post('/api/reaction-roles', async (req: Request, res: Response) => {
     try {
       const { messageId, roleId, reaction } = req.body;
       
@@ -53,7 +54,7 @@ export function startWebServer(client: Client, port: number = 3000) {
   });
 
   // Delete a reaction role
-  app.delete('/api/reaction-roles/:id', async (req, res) => {
+  app.delete('/api/reaction-roles/:id', async (req: Request, res: Response) => {
     try {
       const result = await db.collection('reactionRoles').deleteOne({
         id: parseInt(req.params.id)
@@ -73,7 +74,7 @@ export function startWebServer(client: Client, port: number = 3000) {
   });
 
   // Get available guilds, roles, and channels for the bot
-  app.get('/api/discord/resources', async (req, res) => {
+  app.get('/api/discord/resources', async (req: Request, res: Response) => {
     try {
       const guilds = client.guilds.cache.map(guild => ({
         id: guild.id,
@@ -93,8 +94,8 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
-  // Add this endpoint to webserver.ts
-  app.get('/api/discord/guild/:guildId/emojis', async (req, res) => {
+  // Add endpoint to get server emojis
+  app.get('/api/discord/guild/:guildId/emojis', async (req: Request, res: Response) => {
     try {
       const guildId = req.params.guildId;
       const guild = client.guilds.cache.get(guildId);
