@@ -6,10 +6,10 @@ dotenv.config();
 
 // Database connection configuration - optimized for MariaDB
 const dbConfig = {
-  host: process.env.DB_HOST || 'db', // Changed default to 'db' to match docker service name
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'password',
-  database: process.env.DB_NAME || 'aquadxbot',
+  host: process.env.DB_HOST, // Changed default to 'db' to match docker service name
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
