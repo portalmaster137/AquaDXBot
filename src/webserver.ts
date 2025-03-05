@@ -6,12 +6,16 @@ import { db } from './database';
 import { setupReactionRoleManager } from './reactionRoleManager';
 
 export function startWebServer(client: Client, port: number = 3000) {
+  // Initialize express app
   const app: Application = express();
 
+  // Middleware
   app.use(cors());
   app.use(express.json());
   app.use(express.static(path.join(__dirname, '../public')));
 
+  // API Routes
+  // Get all reaction roles
   app.get('/api/reaction-roles', async (req: Request, res: Response) => {
     try {
       const reactionRoles = await (await db.collection('reactionRoles').find({})).toArray();
@@ -22,20 +26,24 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
+  // Create a new reaction role
   app.post('/api/reaction-roles', async (req: Request, res: Response) => {
     try {
       const { messageId, roleId, reaction } = req.body;
       
+      // Validate input
       if (!messageId || !roleId || !reaction) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
+      // Insert into database
       await db.collection('reactionRoles').insertOne({
         messageId,
         roleId,
         reaction
       });
 
+      // Reload reaction role manager
       await setupReactionRoleManager(client);
       
       res.status(201).json({ success: true, message: 'Reaction role created successfully' });
@@ -45,6 +53,7 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
+  // Delete a reaction role
   app.delete('/api/reaction-roles/:id', async (req: Request, res: Response) => {
     try {
       const result = await db.collection('reactionRoles').deleteOne({
@@ -52,6 +61,7 @@ export function startWebServer(client: Client, port: number = 3000) {
       });
       
       if (result.deletedCount > 0) {
+        // Reload reaction role manager
         await setupReactionRoleManager(client);
         res.json({ success: true, message: 'Reaction role deleted successfully' });
       } else {
@@ -63,6 +73,7 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
+  // Get available guilds, roles, and channels for the bot
   app.get('/api/discord/resources', async (req: Request, res: Response) => {
     try {
       const guilds = client.guilds.cache.map(guild => ({
@@ -83,6 +94,7 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
+  // Add endpoint to get server emojis
   app.get('/api/discord/guild/:guildId/emojis', async (req: Request, res: Response) => {
     try {
       const guildId = req.params.guildId;
@@ -106,10 +118,12 @@ export function startWebServer(client: Client, port: number = 3000) {
     }
   });
 
+  // Serve frontend
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
   });
 
+  // Start server
   app.listen(port, () => {
     console.log(`Web UI running on port ${port}`);
   });

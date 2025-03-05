@@ -14,8 +14,10 @@ const client = ClientSingleton
 client.once('ready', () => {
   console.log(`Logged in as ${client.user?.tag}!`);
   
+  // Setup reaction role manager
   setupReactionRoleManager(client);
   
+  // Start web UI server
   const PORT = parseInt(process.env.WEB_UI_PORT || '3000');
   startWebServer(client, PORT);
 });
